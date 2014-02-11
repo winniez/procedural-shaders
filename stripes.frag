@@ -1,4 +1,3 @@
-#version 330 core
 uniform vec3 StripeColor; 
 uniform vec3 BackColor;
 
@@ -6,11 +5,12 @@ uniform float Width;
 uniform float Fuzz; 
 uniform float Scale;
 
-in vec3 DiffuseColor; 
-in vec3 SpecularColor; 
-in float TexCoord;
+varying vec3 DiffuseColor; 
+varying vec3 SpecularColor; 
+varying float TexCoord;
 
-out vec4 FragColor;
+//out vec4 FragColor;
+vec4 FragColor;
 
 void main()
 {
@@ -24,4 +24,5 @@ void main()
 	vec3 finalColor = mix(BackColor, StripeColor, frac1);
 	finalColor = finalColor * DiffuseColor + SpecularColor;
 	FragColor = vec4(finalColor, 1.0);
+	gl_FragColor = FragColor;
 }

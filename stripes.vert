@@ -1,4 +1,3 @@
-#version 330 core
 uniform vec3 LightPosition; 
 uniform vec3 LightColor; 
 uniform vec3 EyePosition; 
@@ -9,13 +8,13 @@ uniform mat4 MVMatrix;
 uniform mat4 MVPMatrix; 
 uniform mat3 NormalMatrix;
 
-in vec4 MCVertex;
-in vec3 MCNormal;
-in vec2 TexCoord0;
+attribute vec4 MCVertex;
+attribute vec3 MCNormal;
+attribute vec2 TexCoord0;
 
-out vec3 DiffuseColor;
-out vec3 SpecularColor;
-out float TexCoord;
+varying vec3 DiffuseColor;
+varying vec3 SpecularColor;
+varying float TexCoord;
 
 void main() {
 vec3 ecPosition = vec3(MVMatrix * MCVertex);

@@ -15,7 +15,7 @@
 #include "Sphere.h"
 #include "WaveOBJ.h"
 #include "object.c"
-//#include <GL/glext.h>
+#include<vector>
 using namespace std;
 
 int axes=1;       //  Display axes
@@ -28,7 +28,7 @@ int ph=0;         //  Elevation of view angle
 int fov=55;       //  Field of view (for perspective)
 double asp=1;     //  Aspect ratio
 double dim=3.0;   //  Size of world
-int model;        //  Model display list
+vector<Object*> objs;  //  Array of objects
 int shader[] = {0,0,0}; //  Shader program
 char* text[] = {"No Shader","Simple Shader","Basic Shader"};
 
@@ -74,13 +74,8 @@ void display()
 
    //  Draw the model, teapot or cube
    glColor3f(1,1,0);
-   if (obj==2)
-      glCallList(model);
-   else if (obj==1)
-      glutSolidTeapot(1.0);
-   else
-      glutSolidCube(1.0);
-    //Cube(1,0,0 , 0.3,0.3,0.3);
+    objs[obj]->display();
+//Cube(1,0,0 , 0.3,0.3,0.3);
 
    //  No shader for what follows
    glUseProgram(0);
@@ -168,7 +163,7 @@ void key(unsigned char ch,int xch,int ych)
       proj = 1-proj;
    //  Toggle objects
    else if (ch == 'o' || ch == 'O')
-      obj = (obj+1)%3;
+      obj = (obj+1)%4;
    //  Cycle modes
    else if (ch == 'm' || ch == 'M')
       mode = (mode+1)%3;
@@ -202,6 +197,48 @@ void timer(int k)
 }
 
 /*
+ *  Set object states
+ */
+void Set(float zh)
+{
+    //  Change radius of green sphere
+    ((Sphere*)objs[1])->radius(0.3+0.1*Sin(zh));
+    //  Small brown bunny
+    ((WaveOBJ*)objs[2])->color(0.6,0.4,0.2);
+    ((WaveOBJ*)objs[2])->scale(2.0);
+    // armadillo
+    ((WaveOBJ*)objs[3])->color(0.5f, 0.0f, 1.0f);
+    ((WaveOBJ*)objs[3])->scale(0.8);
+}
+
+/*
+ *  Initialize object states
+ */
+void Init()
+{
+   objs.push_back(new Cube(1,0,0 , 0.3,0.3,0.3));
+   objs.push_back(new Sphere(1,1,0 , 0.3 , 1,0,0));
+   objs.push_back(new WaveOBJ("bunny.obj"));
+   objs.push_back(new WaveOBJ("armadillo.obj"));
+   Set(0.0);
+}
+
+
+
+/*
+ *  GLUT calls this routine when the window is resized
+ */
+void idle()
+{
+   //  Elapsed time in seconds
+   double t = glutGet(GLUT_ELAPSED_TIME)/1000.0;
+   //  Translate time into 90 degree/sec angle
+   Set(fmod(90*t,360.0));
+   //  Tell GLUT it is necessary to redisplay the scene
+   glutPostRedisplay();
+}
+
+/*
  *  Start up GLUT and tell it what to do
  */
 int main(int argc,char* argv[])
@@ -226,14 +263,13 @@ int main(int argc,char* argv[])
    glutSpecialFunc(special);
    glutKeyboardFunc(key);
    timer(1);
-   //  Load object
-   model = LoadOBJ("tyra.obj");
    //  Create Shader Programs
-   shader[0] = CreateShaderProg("stripes.vert", "stripes.frag");
-   shader[1] = CreateShaderProg("simple.vert","simple.frag");
+   shader[0] = CreateShaderProg("color.vert", "color.frag");
+   shader[1] = CreateShaderProg("stripes.vert","stripes.frag");
    shader[2] = CreateShaderProg("basic.vert","basic.frag");
    //  Pass control to GLUT so it can interact with the user
    ErrCheck("init");
+   Init();
    glutMainLoop();
    //printf("%s\n", glGetString(GL_VERSION));
    return 0;
